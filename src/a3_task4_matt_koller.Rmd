@@ -16,7 +16,7 @@ library(lubridate)
 
 ## Introduction
 
-TBD
+In this document, I will read in data surrounding urchin collection at several observation sites from 2008 through 2020. I will then wrangle this data to only work with observations made at the Naples Reef site in January 2010. From there, I will conduct exploratory graphics and summary statistic tables to assess the relationship between the distribution of the size values in the annual sections (removal of giant kelp) and control sections (no removal of giant kelp).
 
 ## 1. Read in data
 
@@ -48,7 +48,7 @@ In this section, I will use histograms and QQ-plots to assess whether the size d
 
 ```{r}
 ggplot(data = purp_2010, aes(x = size))+
-  geom_histogram(bin = 30) +
+  geom_histogram(bins = 15) +
   facet_wrap(~treatment)
 ```
 
@@ -61,6 +61,8 @@ ggplot(data = purp_2010, aes(sample = size)) +
 ```
 
 Based on the QQ plot, the size of the urchins observed at Naples Reef in January 2010 appear to be normally distributed in both the annual and control sections.
+
+Based on the histogram and QQ plot, it appears as if the data is normally distributed. The urchins in the control section might be more traditionally normally distributed, but it's hard to say for sure. The urchins in the annual section could reflect more of a flattened out t-distribution, but it's hard to say for certain.
 
 ## 4. Explore summary statistics
 
@@ -82,13 +84,16 @@ Success! I created the table of summary statistics.
 ## 5. Perform a two-sample t-test to compare the means between the two groups.
 
 ```{r}
-annual_section <- purp_2010 %>% 
-  filter(treatment == "ANNUAL") %>% 
-  select("size")
+annual_section <- purp_2010 %>% #create a data subset filtering for...
+  filter(treatment == "ANNUAL") %>% #only annual treatments and..
+  select("size") #generating a single column of variables
 
-control_section <- purp_2010 %>% 
-  filter(treatment == "CONTROL") %>% 
-  select("size")
+control_section <- purp_2010 %>% #create a data subset filtering for...
+  filter(treatment == "CONTROL") %>% #only annual treatments and...
+  select("size") #generating a single column of variables
+
+t.test(x = annual_section, mu = 3.916667) #this is me just playing around, pls ignore
+t.test(x = control_section, mu = 3.725807) #this is me just playing around, pls ignore
 
 t.test(x = annual_section, y = control_section)
 
@@ -98,3 +103,6 @@ Update: I am super stoked on this code, that I wrangled out all by myself with n
 
 ## 6. Conclusion
 
+The dataset examined urchins observed in Naples Reef in January 2010 and whether or not it was in a control section (with no giant kelp removal) or the annual section (with annual kelp removal). The Welch Two Sample t-test assessed the probability that we would have found sample means at least this different if they were drawn from populations with the same mean. The mean size of the annual-site urchins was 3.917 with a standard deviation of 0.966, while the mean size of the control-site urchins was 3.726 with a standard deviation of .867. 
+
+The 95% CI for the annual section is between 3.668 and 4.166, while the 95% CI for the control section is between 3.506 and 3.946, values which are extremely close to each other. The p-value of the Two Sample t-test is 0.2536, indicating that there is a 25.36% chance that the two sample means are at least this different, *if they were drawn from populations with the same mean*.
