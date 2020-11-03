@@ -1,0 +1,100 @@
+---
+title: "Assignment 3 Task 4"
+author: "Matt Koller"
+date: "11/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(here)
+library(kableExtra)
+library(lubridate)
+```
+
+## Introduction
+
+TBD
+
+## 1. Read in data
+
+In this section, I will read in the urchins data.
+
+```{r}
+urchins <- read_csv(here("data", "urchins.csv")) %>% # Read in the urchins.csv file from the data subfolder 
+  clean_names() #Clean the column names to lower_snake_case
+```
+
+## 2. Wrangle data
+
+In this section, I will wrangle the data so that I'm only working with Naples Reef observations for purple urchins observed in January 2010.
+
+```{r}
+purp_2010 <- urchins %>% #Create a new data subset called purp_2010
+  filter(common_name == "Purple Urchin") %>% #Filter for only purple urchins
+  filter(site == "NAPL") %>% #Filter for observations made at the Naples Reef site
+  mutate(date_new = mdy(date)) %>% #create a new column called date_new that will format the date column in date format
+  mutate(month = month(date_new)) %>% #create a new column that will display only the month
+  mutate(year = year(date_new)) %>% #create a new column that will display only the year
+  filter(year == "2010") %>% #filter for only observations made in the year 2010
+  filter(month == "1") #filter for only observations made in the month of January
+```
+
+## 3. Explore data visually
+
+In this section, I will use histograms and QQ-plots to assess whether the size distribution for the Control and Annual treatments is normal.
+
+```{r}
+ggplot(data = purp_2010, aes(x = size))+
+  geom_histogram(bin = 30) +
+  facet_wrap(~treatment)
+```
+
+This histogram accurately displays the distribution of urchin sizes, comparing purple urchins observed at Naples Reef in January 2010 and whether they were part of the control (no giant kelp removal) or annual (annual kelp removal) sections. Based on the histogram, the urchins that were part of the control section appear to be more normally distributed than the urchins that were part of the annual section.
+
+```{r}
+ggplot(data = purp_2010, aes(sample = size)) +
+  geom_qq() +
+  facet_wrap(~treatment)
+```
+
+Based on the QQ plot, the size of the urchins observed at Naples Reef in January 2010 appear to be normally distributed in both the annual and control sections.
+
+## 4. Explore summary statistics
+
+In this section, I will create a basic table of descriptive statistics for both the annual and control sections. 
+
+```{r}
+purple_2010_stats <- purp_2010 %>% 
+  group_by(treatment) %>% 
+  summarize(
+    mean_size = mean(size),
+    sd_size = sd(size),
+    count = n())
+       kbl(purple_2010_stats) %>% #this uses the kableExtra package to make the summary stats table look neat and tidy!
+        kable_styling
+```
+
+Success! I created the table of summary statistics.
+
+## 5. Perform a two-sample t-test to compare the means between the two groups.
+
+```{r}
+annual_section <- purp_2010 %>% 
+  filter(treatment == "ANNUAL") %>% 
+  select("size")
+
+control_section <- purp_2010 %>% 
+  filter(treatment == "CONTROL") %>% 
+  select("size")
+
+t.test(x = annual_section, y = control_section)
+
+```
+
+Update: I am super stoked on this code, that I wrangled out all by myself with no hints or anything. There's almost certainly a better way to do this, but I was able to pare the dataset down to only show the values that we needed to performed the t-sample t-test, and it works. I know  because I compared the means with the summary statistics tables. Woohoo!
+
+## 6. Conclusion
+
