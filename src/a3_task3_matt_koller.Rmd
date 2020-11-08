@@ -44,7 +44,7 @@ I will now create a histogram for both Purple Urchins and Red Urchins, and explo
 Update: according to my histograms, the data appears to be normally distributed for both purple urchins and red urchins
 ```{r}
 ggplot(data = urchin_size, aes(x = size)) + #create a ggplot based on the urchin_size data; the size will go along the x-axis
-  geom_histogram(bins = 20) + #the ggplot will be a histogram, with bins equalling 20
+  geom_histogram() + #the ggplot will be a histogram, with bins equalling 20
   facet_wrap(~common_name) + #this will create two different histograms, one for each kind of urchin
   labs(x = "Size (cm)", #label the x-axis
        y = "Count", #label the y-axis
@@ -80,13 +80,16 @@ urchin_summary <- urchin_size %>%  #create a dataset from urchin_size (which onl
 
 ## 4. Using words to interpret my summary data 
 
-The histograms comparing the size of the purple and red urchins both appear to be normally distributed. The red urchins appear to be, on the whole, larger than the purple urchins. However, the purple urchins appear to be concentrated more closely around their median value, with less variance than the red urchins. The summary statistics table makes it clear that the red urchins have a mean size of 6.78 cm, while the purple urchins have a mean size of 4.47 cm, a difference of 2.31cm. The mean red urchin size is 51.68% larger than the mean purple urchin size.
+The histograms comparing the size of the purple and red urchins both appear to be normally distributed. The red urchins appear to be, on the whole, larger than the purple urchins. However, the purple urchins appear to be concentrated more closely around their median value, with less variance than the red urchins. The summary statistics table makes it clear that the red urchins have a mean size of 6.78 cm, while the purple urchins have a mean size of 4.47 cm, a difference of 2.31cm. The mean purple urchin size is 51.68% larger than the mean red urchin size. The percentage difference between the two is 41.07%.
 
 ```{r}
 mean_size_purple_urchin <- 6.78 #Coding in the mean size for purple urchins
 mean_size_red_urchin <- 4.47 #Coding in the mean size for red urchins
 mean_difference <- mean_size_purple_urchin-mean_size_red_urchin #Calculating the difference in means
-percentage_difference <- (mean_difference/mean_size_red_urchin)*100 #Calculating the percentage difference according to the following: on average, how much bigger (percentage-wise) are red urchins than purple urchins?
+percentage_greater <- (mean_difference/mean_size_red_urchin)*100 #Calculating the percentage difference according to the following: on average, how much bigger (percentage-wise) are purple urchins than red urchins?
+pct_dif <- function(mean_size_purple_urchin, mean_size_red_urchin){(mean_size_red_urchin-mean_size_purple_urchin)/((mean_size_purple_urchin+mean_size_red_urchin)/2)} #Use a function to calculate percentage difference between the two
+pct_dif(mean_size_purple_urchin, mean_size_red_urchin) #calculate percentage difference
+
 ```
 
 
@@ -108,7 +111,6 @@ purple_urchins <- urchins %>% #this creates a new data subset called purple_urch
     site == c("MOHK") ~ "Mohawk Reef",
     site == c("IVEE") ~ "Isla Vista Reef"
     ))
-  
 ```
 
 ## 2. Create a summary table
@@ -128,7 +130,8 @@ In this section, I will create an exploratory graph assessing the number of urch
 ```{r}
 
 ggplot(data = purple_urchin_summary, aes(x = year, y = n))+ #this makes a graph comparing the year with the urchin count during each year. The "n" comes from the column generated in the previous code chunk by using the count function to tally the number of urchin observations at each site for each year.
-  geom_col(aes(color = site_full)) + #This creates a bar graph demonstrating the counts of urchins by year at each reef. I originally tried doing a histogram and was getting tripped up, because the histogram only requires a single x variable and I couldn't find a way to give it a y variable (or somehow change my code in th eprevious chunk such that it was counting the number of observations), so I checked the Slack and others were having issues too....issues which were solved by using a geom_col!
+  geom_col(aes(color = site_full)) + #This creates a bar graph demonstrating the counts of urchins by year at each reef. I originally tried doing a histogram and was getting tripped up, because the histogram only requires a single x variable and I couldn't find a way to give it a y variable (or somehow change my code in the previous chunk such that it was counting the number of observations), so I checked the Slack and others were having issues too....issues which were solved by using a geom_col!
+  theme(legend.position="FALSE") + #removing legend from the graph
   facet_wrap(~site_full) #This creates a separate graph for each observation site!
 
 ```
